@@ -1,0 +1,58 @@
+version: '3.8'
+services:
+  wordpress:
+    image: wordpress:latest
+    environment:
+      WORDPRESS_DB_HOST: mariadb
+      WORDPRESS_DB_USER: example_user
+      WORDPRESS_DB_PASSWORD: example_password
+      WORDPRESS_DB_NAME: example_db
+      WORDPRESS_REDIS_HOST: redis
+    ports:
+      - "8080:80"
+    volumes:
+      - /your/local/path/wp-content:/var/www/html/wp-content
+    depends_on:
+      - mariadb
+      - nginx
+  mariadb:
+    image: mariadb:10.5
+    environment:
+      MYSQL_ROOT_PASSWORD: example_password
+      MYSQL_DATABASE: example_db
+      MYSQL_USER: example_user
+      MYSQL_PASSWORD: example_password
+    volumes:
+      - /your/local/path/mariadb:/var/lib/mysql
+  php:
+    image: php:8.1-fpm
+    volumes:
+      - /your/local/path/php/conf.d:/usr/local/etc/php/conf.d
+      - /your/local/path/wp-content:/var/www/html/wp-content
+  nginx:
+    image: nginx:latest
+    volumes:
+      - /your/local/path/nginx/conf.d:/etc/nginx/conf.d
+      - /your/local/path/wp-content:/var/www/html/wp-content
+    ports:
+      - "80:80"
+    depends_on:
+      - wordpress
+  wpcli:
+    image: wordpress:cli-php8.1
+    volumes:
+      - /your/local/path/wp-content:/var/www/html/wp-content
+    depends_on:
+      - mariadb
+  redis:
+    image: redis:latest
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      PMA_HOST: mariadb
+      PMA_USER: example_user
+      PMA_PASSWORD: example_password
+    ports:
+      - "8081:80"
+    depends_on:
+      - mariadb
