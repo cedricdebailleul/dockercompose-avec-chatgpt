@@ -12,7 +12,7 @@ services:
     volumes:
       - /srv/www/etsiboutique/wp-content:/var/www/html/wp-content
       - /srv/www/etsiboutique/wp-config.php:/var/www/html/wp-config.php
-      - ./:/srv/www/etsiboutique
+      - /srv/www/etsiboutique:/srv/www/etsiboutique
   mariadb:
     image: mariadb:latest
     environment:
