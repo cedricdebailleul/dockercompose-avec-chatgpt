@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.9"
 services:
   wordpress:
     image: wordpress:latest
@@ -7,52 +7,46 @@ services:
       WORDPRESS_DB_USER: example_user
       WORDPRESS_DB_PASSWORD: example_password
       WORDPRESS_DB_NAME: example_db
-      WORDPRESS_REDIS_HOST: redis
     ports:
-      - "8080:80"
+      - 8081:80
     volumes:
-      - /your/local/path/wp-content:/var/www/html/wp-content
-    depends_on:
-      - mariadb
-      - nginx
+      - /srv/www/etsiboutique/wp-content:/var/www/html/wp-content
+      - /srv/www/etsiboutique/wp-config.php:/var/www/html/wp-config.php
   mariadb:
-    image: mariadb:10.5
+    image: mariadb:latest
     environment:
       MYSQL_ROOT_PASSWORD: example_password
-      MYSQL_DATABASE: example_db
       MYSQL_USER: example_user
       MYSQL_PASSWORD: example_password
+      MYSQL_DATABASE: example_db
     volumes:
-      - /your/local/path/mariadb:/var/lib/mysql
+      - dbdata:/var/lib/mysql
+  redis:
+    image: redis:latest
   php:
     image: php:8.1-fpm
     volumes:
-      - /your/local/path/php/conf.d:/usr/local/etc/php/conf.d
-      - /your/local/path/wp-content:/var/www/html/wp-content
-  nginx:
-    image: nginx:latest
-    volumes:
-      - /your/local/path/nginx/conf.d:/etc/nginx/conf.d
-      - /your/local/path/wp-content:/var/www/html/wp-content
-    ports:
-      - "80:80"
-    depends_on:
-      - wordpress
-  wpcli:
-    image: wordpress:cli-php8.1
-    volumes:
-      - /your/local/path/wp-content:/var/www/html/wp-content
-    depends_on:
-      - mariadb
-  redis:
-    image: redis:latest
+      - /srv/www/etsiboutique/php-fpm.conf:/usr/local/etc/php/conf.d
+      - /srv/www/etsiboutique/wp-content:/var/www/html/wp-content
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     environment:
       PMA_HOST: mariadb
+      PMA_PORT: 3306
       PMA_USER: example_user
       PMA_PASSWORD: example_password
     ports:
-      - "8081:80"
-    depends_on:
-      - mariadb
+      - 8080:80
+  nginx:
+    image: nginx:latest
+    volumes:
+      - /srv/www/etsiboutique/nginx:/etc/nginx/conf.d
+      - /srv/www/etsiboutique/nginx/log:/var/log/nginx
+    ports:
+      - "8082:80"
+  wpcli:
+    image: wordpress:cli-php8.1
+    volumes:
+      - /srv/www/etsiboutique/wp-content:/var/www/html/wp-content
+volumes:
+  dbdata:
